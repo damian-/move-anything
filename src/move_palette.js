@@ -29,10 +29,6 @@ Record (audio) 118
 Delete 119
 */
 
-
-
-
-
 globalThis.onMidiMessageExternal = function (data) {
     console.log(`onMidiMessageExternal ${data[0].toString(16)} ${data[1].toString(16)} ${data[2].toString(16)}`);
 
@@ -212,4 +208,5 @@ globalThis.tick = function(deltaTime) {
 //     move_midi_internal_send([0<<4 | 0xf, 0xf8, 0, 0]);
 
     animCounter = 0;
+}0;
 }
