@@ -14,8 +14,6 @@ By default, these go from black (0) through to white (127).
 ### Added feature: Knob banks
 This extends the 9 physical knobs (the 8 knobs above the tracks, plus the 9th volume knob) to 8 banks, for a total of 72 virtual knobs. 
 
-Knob banks are accessed by pressing the even-numbered sequencer buttons across the bottom (in between the odd numbered buttons used for muting/soloing tracks). The relevant button will light up indicating that knob bank is selected.
-
 The knob banks are:
 * **Bank 1** MIDI CC71 - CC79, displayed with black/white colors
 * **Bank 2** MIDI CC14 - CC22, displayed with a synthwave color scheme
@@ -28,12 +26,17 @@ The knob banks are:
 
 These values are chosen to retain compatibility with the Move Anything project (so bank 1 values are unchanged from the default) and to avoid clashes with reserved or commonly used MIDI CC values.
 
+**How to use:** Knob banks are accessed by pressing the even-numbered sequencer buttons across the bottom (in between the odd numbered buttons used for muting/soloing tracks). The relevant button will light up indicating that knob bank is selected.
+
+
 ### Added feature: Display only odd rows
 When clicking the jog wheel, Move Anything by default swaps between the top 4 and bottom 4 rows. 
 
-This feature adds a new 3rd mode to only display rows 1, 3, 5 and 7 (or rows 00, 02, 04, 06 on the M8). So clicking the jog wheel toggles between Top -> Bottom -> Odd rows
+This feature adds a new 3rd mode to only display rows 1, 3, 5 and 7 (or rows 00, 02, 04, 06 on the M8). 
 
 This only-odd-rows is useful if you structure your M8 tracks to only use every other row. Many performers choose to do this for live performances, because it allows you to loop chains, rather than have them automatically progress to the next chain.
+
+**How to use:** Click the jog wheel two times. You should see the back button flash rapidly. The first click will move from Top rows to Bottom rows, and the second click will move from Bottom rows to Odd rows. Subsequent clicks of the jog wheel will keep cycling between Top (displayed with a solid light) -> Bottom (displayed with a slow pulse) -> Odd (displayed with a fast flash) rows. 
 
 
 ## How to install
