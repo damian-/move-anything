@@ -14,7 +14,7 @@ By default, these go from black (0) through to white (127).
 ### Added feature: Knob banks
 This extends the 9 physical knobs (the 8 knobs above the tracks, plus the 9th volume knob) to 8 banks, for a total of 72 virtual knobs. 
 
-Knob banks are accessed by pressing the even-numbered sequencer buttons across the bottom (the even numbered buttons are for muting/soloing tracks). The relevant button will light up indicating that knob bank is selected.
+Knob banks are accessed by pressing the even-numbered sequencer buttons across the bottom (in between the odd numbered buttons used for muting/soloing tracks). The relevant button will light up indicating that knob bank is selected.
 
 The knob banks are:
 * **Bank 1** MIDI CC71 - CC79, displayed with black/white colors
