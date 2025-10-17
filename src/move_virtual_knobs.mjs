@@ -119,18 +119,132 @@ RGB COLOR PALETTE (INDEXED 0–127)
 ================================================================================
 */
 
-const synthwaveColorSweep = [0, 104, 105, 20, 21, 23, 26, 25];
-const roseColorSweep = [0, 124, 35, 23, 26, 25];
+const synthwaveColorSweep = [104, 105, 20, 21, 23, 26, 25];
+const roseColorSweep = [124, 35, 23, 26, 25];
 const neutralColorSweep = [0, 124, 123, 120];
 const rainbowColorSweep = [33, 16, 15, 14, 11, 8, 3, 2];
 
+const banks = [
+    {
+        bank: 0,
+        ccMap: new Map([ // CC71 - CC79
+            [71, 71], [72, 72], [73, 73], [74, 74], [75, 75], [76, 76], [77, 77], [78, 78], [79, 79]
+        ]),
+        colorSweep: neutralColorSweep,
+        knobs: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        led: 17
+    },
+    {
+        bank: 1,
+        ccMap: new Map([ // CC14 - CC22
+            [71, 14], [72, 15], [73, 16], [74, 17], [75, 18], [76, 19], [77, 20], [78, 21], [79, 22]
+        ]),
+        colorSweep: synthwaveColorSweep,
+        knobs: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        led: 19
+    },
+    {
+        bank: 2, 
+        ccMap: new Map([ // CC23 - CC31
+            [71, 23], [72, 24], [73, 25], [74, 26], [75, 27], [76, 28], [77, 29], [78, 30], [79, 31]
+        ]),
+        colorSweep: roseColorSweep,
+        knobs: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        led: 21
+    }, 
+    {
+        bank: 3,
+        ccMap: new Map([ // CC35 - CC43
+            [71, 35], [72, 36], [73, 37], [74, 38], [75, 39], [76, 40], [77, 41], [78, 42], [79, 43]
+        ]),
+        colorSweep: rainbowColorSweep,
+        knobs: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        led: 23
+    },
+    {
+        bank: 4,
+        ccMap: new Map([ // CC44 - CC52
+            [71, 44], [72, 45], [73, 46], [74, 47], [75, 48], [76, 49], [77, 50], [78, 51], [79, 52]
+        ]),
+        colorSweep: neutralColorSweep,
+        knobs: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        led: 25
+    },
+    {
+        bank: 5, 
+        ccMap: new Map([ // CC53 - CC61
+            [71, 53], [72, 54], [73, 55], [74, 56], [75, 57], [76, 58], [77, 59], [78, 60], [79, 61]
+        ]),
+        colorSweep: synthwaveColorSweep,
+        knobs: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        led: 27
+    }, 
+    {
+        bank: 6,
+        ccMap: new Map([ // CC102 - CC110
+            [71, 102], [72, 103], [73, 104], [74, 105], [75, 106], [76, 107], [77, 108], [78, 109], [79, 110]
+        ]),
+        colorSweep: roseColorSweep,
+        knobs: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        led: 29
+    },
+    {
+        bank: 7,
+        ccMap: new Map([ // CC111 - CC119
+            [71, 111], [72, 112], [73, 113], [74, 114], [75, 115], [76, 116], [77, 117], [78, 118], [79, 119]
+        ]),
+        colorSweep: rainbowColorSweep,
+        knobs: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        led: 31
+    }
+];
+
+let bank = banks[0];
+
+
+
 function getColorForKnobValue(value = 0) {
-    const colorSweep = neutralColorSweep;
+    // const colorSweep = neutralColorSweep;
+    const colorSweep = bank.colorSweep;
 
     const level = clamp(value, 0, 127) / 127;
     const index = Math.round(level * (colorSweep.length - 1));
 
     return colorSweep[index];
+}
+
+function setKnobLed(moveControlNumber, value) {
+    move_midi_internal_send([0 << 4 | 0xb, 0xb1 | 0, moveControlNumber, getColorForKnobValue(value)]);
+}
+
+export function changeBank(index = 0) {
+    // save knob state
+    banks[bank.bank].knobs = knobs;
+
+    // turn off old bank LED
+    const black = 0x00;
+    move_midi_internal_send([0 << 4 | 0x9, 0x91 | 0, bank.led, black]);
+
+    // load new bank
+    bank = banks[index];
+
+    // get knobs state
+    knobs = bank.knobs;
+
+    // set bank LED
+    const white = 0x7a;
+    move_midi_internal_send([0 << 4 | 0x9, 0x91 | 0, bank.led, white]);
+
+    // set knob LEDs
+    setKnobLed(71, knobs[0]);
+    setKnobLed(72, knobs[1]);
+    setKnobLed(73, knobs[2]);
+    setKnobLed(74, knobs[3]);
+    setKnobLed(75, knobs[4]);
+    setKnobLed(76, knobs[5]);
+    setKnobLed(77, knobs[6]);
+    setKnobLed(78, knobs[7]);
+    setKnobLed(79, knobs[8]);
 }
 
 
@@ -166,8 +280,7 @@ export function handleMoveKnobs(data, channel = 3) {
 
         console.log(`Sending CC ${moveControlNumber} value: ${knobs[knob]}`);
         move_midi_external_send([2 << 4 | 0xb, 0xb0 | channel, moveControlNumber, knobs[knob]]);
-        
-        move_midi_internal_send([0 << 4 | 0xb, 0xb1 | 0, moveControlNumber, getColorForKnobValue(knobs[knob])]);
+        setKnobLed(moveControlNumber, knobs[knob]);
         return true;
     }
 

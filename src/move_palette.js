@@ -29,6 +29,10 @@ Record (audio) 118
 Delete 119
 */
 
+
+
+
+
 globalThis.onMidiMessageExternal = function (data) {
     console.log(`onMidiMessageExternal ${data[0].toString(16)} ${data[1].toString(16)} ${data[2].toString(16)}`);
 

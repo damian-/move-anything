@@ -1,5 +1,5 @@
 import { aftertouchToModwheel } from "./aftertouch_to_modwheel.mjs";
-import { handleMoveKnobs } from "./move_virtual_knobs.mjs";
+import { handleMoveKnobs, changeBank } from "./move_virtual_knobs.mjs";
 
 // https://github.com/Ableton/push-interface/blob/main/doc/AbletonPush2MIDIDisplayInterface.asc#setting-led-colors
 
@@ -115,6 +115,10 @@ const lppPadToMovePadMapBottom = new Map([
 const moveToLppPadMapBottom = new Map([...lppPadToMovePadMapBottom.entries()].map((a) => [a[1], a[0]]));
 
 let showingTop = true;
+
+const movePadToKnobBankMap = new Map([
+    [17, 0], [19, 1], [21, 2], [23, 3], [25, 4], [27, 5], [29, 6], [31, 7]
+]);
 
 const light_grey = 0x7c;
 const dim_grey = 0x10;
@@ -396,6 +400,12 @@ globalThis.onMidiMessageInternal = function (data) {
         let lppNote = activeMoveToLppPadMap.get(moveNoteNumber);
 
         if (!lppNote) {
+            // check if you're switching knob banks
+            if (movePadToKnobBankMap.has(moveNoteNumber)) {
+                changeBank(movePadToKnobBankMap.get(moveNoteNumber));
+                return;
+            }
+
             console.log(`Move: unmapped note [${moveNoteNumber}]`);
             return;
         }
@@ -502,6 +512,9 @@ function initLPP() {
     console.log("Sending M8 LPP init");
     move_midi_external_send(LPPInitSysex);
     showingTop = true;
+
+    // enable knobs CC71-79
+    changeBank(0);
 
     // clear_screen();
     // print(0, 0, "Move Anything", 1);
