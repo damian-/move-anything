@@ -92,6 +92,47 @@ const moveControlToLppNoteMapBottom = new Map([
 
 const lppNoteToMoveControlMapBottom = new Map([...moveControlToLppNoteMapBottom.entries()].map((a) => [a[1], a[0]]));
 
+const moveControlToLppNoteMapOdd = new Map([
+    [55, 80],
+    [54, 70],
+    [62, 91],
+    [63, 92],
+    [85, 20],
+    [43, 89], // move track 1 -> LPP track 1
+    [42, 69], // move track 3 -> LPP track 3
+    [41, 49], // move track 1 -> LPP track 5
+    [40, 29], // move track 3 -> LPP track 7
+    [50, 94],
+    [49, 90],
+    [119, 60],
+    [51, 93],
+    [52, 97],
+    [88, 2],
+    [56, 1],
+    [86, 10],
+    [60, 50],
+    [58, 3],
+    [118, 98],
+    // [78, 99]
+    // here to allow Novation Logo LED msg to pass
+    [99, 99]
+]);
+
+const lppNoteToMoveControlMapOdd = new Map([...moveControlToLppNoteMapOdd.entries()].map((a) => [a[1], a[0]]));
+
+const moveControlToLppNoteMapByType = {
+    0: moveControlToLppNoteMapTop, 
+    1: moveControlToLppNoteMapBottom, 
+    2: moveControlToLppNoteMapOdd
+};
+
+const lppNoteToMoveControlMapByType = {
+    0: lppNoteToMoveControlMapTop,
+    1: lppNoteToMoveControlMapBottom,
+    2: lppNoteToMoveControlMapOdd
+};
+
+
 
 const lppPadToMovePadMapTop = new Map([
     [81, 92], [82, 93], [83, 94], [84, 95], [85, 96], [86, 97], [87, 98], [88, 99],
@@ -114,7 +155,29 @@ const lppPadToMovePadMapBottom = new Map([
 
 const moveToLppPadMapBottom = new Map([...lppPadToMovePadMapBottom.entries()].map((a) => [a[1], a[0]]));
 
-let showingTop = true;
+const lppPadToMovePadMapOdd = new Map([
+    [81, 92], [82, 93], [83, 94], [84, 95], [85, 96], [86, 97], [87, 98], [88, 99],
+    [61, 84], [62, 85], [63, 86], [64, 87], [65, 88], [66, 89], [67, 90], [68, 91],
+    [41, 76], [42, 77], [43, 78], [44, 79], [45, 80], [46, 81], [47, 82], [48, 83],
+    [21, 68], [22, 69], [23, 70], [24, 71], [25, 72], [26, 73], [27, 74], [28, 75],
+    [101, 16], [102, 18], [103, 20], [104, 22], [105, 24], [106, 26], [107, 28], [108, 30]
+])
+
+const moveToLppPadMapOdd = new Map([...lppPadToMovePadMapOdd.entries()].map((a) => [a[1], a[0]]));
+
+const lppPadToMovePadMapByType = {
+    0: lppPadToMovePadMapTop,
+    1: lppPadToMovePadMapBottom,
+    2: lppPadToMovePadMapOdd
+};
+
+const moveToLppPadMapByType = {
+    0: moveToLppPadMapTop,
+    1: moveToLppPadMapBottom,
+    2: moveToLppPadMapOdd
+};
+
+let showingWhich = 0; // 0 = top, 1 = bottom, 2 = odd
 
 const movePadToKnobBankMap = new Map([
     [17, 0], [19, 1], [21, 2], [23, 3], [25, 4], [27, 5], [29, 6], [31, 7]
@@ -177,7 +240,7 @@ let timeStart = new Date();
 let lppDebugSuperlog = false;
 
 function updateMovePadsToMatchLpp() {
-    let activeMoveToLppPadMap = showingTop ? moveToLppPadMapTop : moveToLppPadMapBottom;
+    let activeMoveToLppPadMap = moveToLppPadMapByType[showingWhich];
 
     console.log(activeMoveToLppPadMap);
 
@@ -196,8 +259,11 @@ function updateMoveViewPulse(){
     move_midi_internal_send([0 << 4 | 0xb, 0xB0, moveMENU, dim_grey]);
     move_midi_internal_send([0 << 4 | 0xb, 0xB0, moveCAP, dim_grey]);
     move_midi_internal_send([0 << 4 | 0xb, 0xB0, currentView, light_grey]);
-    if (!showingTop) {
+
+    if (showingWhich == 1) { // bottom - slow pulse
         move_midi_internal_send([0 << 4 | 0xb, 0xBA, currentView, black]);
+    } else if (showingWhich == 2) { // odd - faster blink
+        move_midi_internal_send([0 << 4 | 0xb, 0xBD, currentView, black]);
     }
 }
 
@@ -294,7 +360,7 @@ globalThis.onMidiMessageExternal = function (data) {
          console.log(padString);
     }
 
-    let activeLppToMovePadMap = showingTop ? lppPadToMovePadMapTop : lppPadToMovePadMapBottom;
+    let activeLppToMovePadMap = lppPadToMovePadMapByType[showingWhich];
 
     let moveNoteNumber = activeLppToMovePadMap.get(lppNoteNumber);
     let moveVelocity = lppColorToMoveColorMap.get(lppVelocity) ?? lppVelocity;
@@ -312,7 +378,7 @@ globalThis.onMidiMessageExternal = function (data) {
         return;
     }
 
-    let activeLppToMoveControlMap = showingTop ? lppNoteToMoveControlMapTop : lppNoteToMoveControlMapBottom;
+    let activeLppToMoveControlMap = lppNoteToMoveControlMapByType[showingWhich];
 
     let moveControlNumber = activeLppToMoveControlMap.get(lppNoteNumber);
 
@@ -373,14 +439,13 @@ globalThis.onMidiMessageInternal = function (data) {
         return;
     }
 
-    let activeMoveToLppPadMap = showingTop ? moveToLppPadMapTop : moveToLppPadMapBottom;
-
+    let activeMoveToLppPadMap = moveToLppPadMapByType[showingWhich];
 
     if (isNote) {
         let moveNoteNumber = data[1];
 
         if (moveNoteNumber === moveWHEELTouch && data[2] == 127) {
-            showingTop = !showingTop;
+            showingWhich = (showingWhich + 1) % 3;
             updateMovePadsToMatchLpp();
             updateMoveViewPulse();
             return;
@@ -389,7 +454,7 @@ globalThis.onMidiMessageInternal = function (data) {
         if (moveNoteNumber === moveWHEELTouch && data[2] == 0) {
             // don't toggleback if Wheel clicked
             if (!wheelClicked) {
-                showingTop = !showingTop;
+                showingWhich = (showingWhich + 1) % 3;
                 updateMovePadsToMatchLpp();
                 updateMoveViewPulse();
             }
@@ -429,7 +494,7 @@ globalThis.onMidiMessageInternal = function (data) {
         console.log("control message");
         let moveControlNumber = data[1];
 
-        let activeMoveControlToLppNoteMap = showingTop ? moveControlToLppNoteMapTop : moveControlToLppNoteMapBottom;
+        let activeMoveControlToLppNoteMap = moveControlToLppNoteMapByType[showingWhich];
 
         let lppNote = activeMoveControlToLppNoteMap.get(moveControlNumber);
 
@@ -449,7 +514,7 @@ globalThis.onMidiMessageInternal = function (data) {
         let toggleTopBottom = moveControlNumber === moveWHEEL && data[2] === 0x7f;
         if (toggleTopBottom) {
             wheelClicked = true;
-//            showingTop = !showingTop;
+//            showingWhich = (showingWhich + 1) % 3;
 //            updateMovePadsToMatchLpp();
             return;
         }
@@ -511,7 +576,7 @@ function initLPP() {
     // Trigger LPP mode on the M8
     console.log("Sending M8 LPP init");
     move_midi_external_send(LPPInitSysex);
-    showingTop = true;
+    showingWhich = 0;
 
     // enable knobs CC71-79
     changeBank(0);
