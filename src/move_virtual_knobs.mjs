@@ -245,6 +245,9 @@ export function changeBank(index = 0) {
     setKnobLed(77, knobs[6]);
     setKnobLed(78, knobs[7]);
     setKnobLed(79, knobs[8]);
+
+    // clear_screen();
+    // print(0, 0, `Knobs ${index * 9 + 1}-${index * 9 + 9}`, 1);
 }
 
 
