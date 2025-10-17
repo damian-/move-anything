@@ -278,8 +278,11 @@ export function handleMoveKnobs(data, channel = 3) {
 
         knobs[knob] = clamp(knobs[knob], 0, 127);
 
-        console.log(`Sending CC ${moveControlNumber} value: ${knobs[knob]}`);
-        move_midi_external_send([2 << 4 | 0xb, 0xb0 | channel, moveControlNumber, knobs[knob]]);
+        const ccNumber = bank.ccMap.get(moveControlNumber);
+        console.log(`Sending CC ${ccNumber} value: ${knobs[knob]}`);
+
+        move_midi_external_send([2 << 4 | 0xb, 0xb0 | channel, ccNumber, knobs[knob]]);
+
         setKnobLed(moveControlNumber, knobs[knob]);
         return true;
     }
