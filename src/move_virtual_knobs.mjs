@@ -1,6 +1,7 @@
 import {clamp} from "./math_helpers.mjs"
 let knobs = [0,0,0,0,0,0,0,0,0];
 
+const knobLEDs = {}; // LED color cache
 
 /*
 ================================================================================
@@ -214,7 +215,12 @@ function getColorForKnobValue(value = 0) {
 }
 
 function setKnobLed(moveControlNumber, value) {
-    move_midi_internal_send([0 << 4 | 0xb, 0xb1 | 0, moveControlNumber, getColorForKnobValue(value)]);
+    // check if we're just setting the same color
+    const color = getColorForKnobValue(value);
+    if (knobLEDs[moveControlNumber] === color) return;
+
+    move_midi_internal_send([0 << 4 | 0xb, 0xb1 | 0, moveControlNumber, color]);
+    knobLEDs[moveControlNumber] = color;
 }
 
 export function changeBank(index = 0) {
