@@ -444,6 +444,7 @@ globalThis.onMidiMessageInternal = function (data) {
     if (isNote) {
         let moveNoteNumber = data[1];
 
+        // touch wheel
         if (moveNoteNumber === moveWHEELTouch && data[2] == 127) {
             showingWhich = (showingWhich + 1) % 3;
             updateMovePadsToMatchLpp();
@@ -451,10 +452,11 @@ globalThis.onMidiMessageInternal = function (data) {
             return;
         }
 
+        // release wheel
         if (moveNoteNumber === moveWHEELTouch && data[2] == 0) {
             // don't toggleback if Wheel clicked
             if (!wheelClicked) {
-                showingWhich = (showingWhich + 1) % 3;
+                showingWhich = (showingWhich - 1) % 3;
                 updateMovePadsToMatchLpp();
                 updateMoveViewPulse();
             }
@@ -511,6 +513,7 @@ globalThis.onMidiMessageInternal = function (data) {
             return;
         }
 
+        // click wheel
         let toggleTopBottom = moveControlNumber === moveWHEEL && data[2] === 0x7f;
         if (toggleTopBottom) {
             wheelClicked = true;
