@@ -179,6 +179,9 @@ const moveToLppPadMapByType = {
 
 let showingWhich = 0; // 0 = top, 1 = bottom, 2 = odd
 
+// change to true to support touching the wheel to "peek" at next page
+const SUPPORT_WHEEL_TOUCH = false;
+
 const movePadToKnobBankMap = new Map([
     [17, 0], [19, 1], [21, 2], [23, 3], [25, 4], [27, 5], [29, 6], [31, 7]
 ]);
@@ -445,7 +448,7 @@ globalThis.onMidiMessageInternal = function (data) {
         let moveNoteNumber = data[1];
 
         // touch wheel
-        if (moveNoteNumber === moveWHEELTouch && data[2] == 127) {
+        if (moveNoteNumber === moveWHEELTouch && data[2] == 127 && SUPPORT_WHEEL_TOUCH) {
             showingWhich = (showingWhich + 1) % 3;
             updateMovePadsToMatchLpp();
             updateMoveViewPulse();
@@ -455,7 +458,7 @@ globalThis.onMidiMessageInternal = function (data) {
         // release wheel
         if (moveNoteNumber === moveWHEELTouch && data[2] == 0) {
             // don't toggleback if Wheel clicked
-            if (!wheelClicked) {
+            if (!wheelClicked && SUPPORT_WHEEL_TOUCH) {
                 showingWhich = (showingWhich - 1) % 3;
                 updateMovePadsToMatchLpp();
                 updateMoveViewPulse();
@@ -517,8 +520,13 @@ globalThis.onMidiMessageInternal = function (data) {
         let toggleTopBottom = moveControlNumber === moveWHEEL && data[2] === 0x7f;
         if (toggleTopBottom) {
             wheelClicked = true;
-//            showingWhich = (showingWhich + 1) % 3;
-//            updateMovePadsToMatchLpp();
+
+            if (!SUPPORT_WHEEL_TOUCH) {
+                showingWhich = (showingWhich + 1) % 3;
+                updateMovePadsToMatchLpp();
+                updateMoveViewPulse();                
+            }
+
             return;
         }
 
